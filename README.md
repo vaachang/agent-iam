@@ -51,6 +51,7 @@ bash scripts/smoke_test.sh
 - `docs/api-design.md`
 - `docs/demo-script.md`
 - `docs/worklog-2026-04-25.md`
+- `docs/next-steps.md`
 
 ## Project Layout
 
