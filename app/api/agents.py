@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.agents.doc_agent import generate_report
+from app.agents.doc_agent import generate_report, generate_report_with_fallback
 from app.agents.enterprise_data_agent import read_bitable
 from app.agents.web_search_agent import attempt_internal_read, search_public_web
 from app.api.common import to_http_exception
@@ -22,6 +22,13 @@ router = APIRouter(prefix="/api/v1/agents", tags=["agents"])
 @router.post("/doc-agent/tasks/generate-report", response_model=GenerateReportResponse)
 def generate_report_endpoint(payload: GenerateReportRequest):
     result = generate_report(payload.user_id)
+    result["prompt"] = payload.prompt
+    return result
+
+
+@router.post("/doc-agent/tasks/generate-report-with-fallback")
+def generate_report_with_fallback_endpoint(payload: GenerateReportRequest):
+    result = generate_report_with_fallback(payload.user_id)
     result["prompt"] = payload.prompt
     return result
 

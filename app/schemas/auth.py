@@ -17,6 +17,8 @@ class DelegatedTokenRequest(BaseModel):
     resource: str = Field(..., examples=["bitable"])
     action: str = Field(..., examples=["read"])
     task_name: str = Field(..., examples=["generate_report"])
+    purpose: str | None = Field(default=None, examples=["quarterly_reporting"])
+    current_hour: int | None = Field(default=None, ge=0, le=23, examples=[10])
     trace_id: str | None = None
     parent_jti: str | None = None
 

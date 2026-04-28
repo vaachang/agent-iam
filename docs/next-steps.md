@@ -1,28 +1,41 @@
 # Next Steps
 
-## Highest Priority
+## Completed In This Iteration
 
-- Add a real architecture diagram.
-  - The project already has textual architecture notes, but the acceptance criteria explicitly require an architecture diagram.
-- Add an exception-flow demo for agent timeout or downstream failure.
-  - The project already demonstrates permission denial.
-  - It still needs a clear "agent timeout/failure and system response" path.
-- Improve judge-facing demo materials.
-  - Add a concise acceptance walkthrough.
-  - Add screenshots or a short recorded demo when ready.
+- Added a real architecture diagram in `docs/architecture.md`.
+- Added a timeout/degraded-flow demo:
+  - `POST /api/v1/demo/run/timeout-flow`
+  - `POST /api/v1/agents/doc-agent/tasks/generate-report-with-fallback`
+- Added a lightweight visualization page:
+  - `GET /ui/audit`
+- Improved judge-facing materials:
+  - updated `README.md`
+  - updated `docs/demo-script.md`
+  - added `docs/acceptance-walkthrough.md`
+- Strengthened dynamic authorization:
+  - task-scoped conditions
+  - time-scoped conditions
+  - richer token context
+- Added a second failure mode:
+  - `POST /api/v1/demo/run/unavailable-flow`
+  - explicit `AGENT_001` path
+- Expanded audit filtering and UI controls:
+  - filter by `reason_code`
+  - filter by agent pair
+  - filter by `decision`
+  - copyable cURL snippets per filtered trace view
 
-## High Value Improvements
+## Remaining High Value Improvements
 
-- Build a lightweight visualization page for:
-  - trace IDs
-  - token core fields
-  - allow/deny audit chain
-- Strengthen dynamic authorization.
-  - Add task-scoped conditions.
-  - Add time-scoped conditions.
-  - Make delegated tokens more context-aware.
-- Add timeout simulation and graceful fallback behavior.
-  - Example: enterprise-data-agent timeout, doc-agent returns a clear failure response and writes audit logs.
+- Add a chained delegation demo.
+  - Example: `doc-agent -> enterprise-data-agent -> downstream-service-agent`
+  - Persist and validate `parent_jti` across more than one hop
+- Tighten token hardening further.
+  - Bind tokens to narrower task intents
+  - Add nonce or one-time-use semantics for sensitive paths
+- Expand audit analytics.
+  - Add aggregated counts by `reason_code`
+  - Add per-agent success/deny summaries
 
 ## Optional Enhancements
 
@@ -37,8 +50,6 @@
 
 ## Recommended Execution Order
 
-1. Add the architecture diagram.
-2. Implement the timeout/failure demo flow.
-3. Build the minimal audit visualization page.
-4. Strengthen dynamic authorization rules.
-5. Refactor external integrations behind adapters.
+1. Add chained delegation with `parent_jti` validation.
+2. Expand audit analytics and summaries.
+3. Refactor external integrations behind adapters.

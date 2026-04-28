@@ -6,7 +6,11 @@ from datetime import datetime, timezone
 from app.core.database import get_connection
 from app.core.security import build_token_payload, decode_token, encode_token
 from app.services.audit_service import write_audit_log
-from app.services.policy_service import compute_effective_capabilities
+from app.services.policy_service import (
+    PolicyContext,
+    compute_effective_capabilities,
+    get_denial_reasons,
+)
 
 
 def register_agent(agent_id: str, name: str, role: str, description: str) -> dict:
@@ -40,19 +44,58 @@ def issue_delegated_token(
     resource: str,
     action: str,
     task_name: str,
+    purpose: str | None,
+    current_hour: int | None,
     trace_id: str | None,
     parent_jti: str | None,
 ) -> dict:
+    context = PolicyContext(
+        task_name=task_name,
+        purpose=purpose,
+        current_hour=current_hour,
+    )
     effective_capabilities = compute_effective_capabilities(
         delegated_user,
         caller_agent,
         target_agent,
+        task_name=context.task_name,
+        purpose=context.purpose,
+        current_hour=context.current_hour,
     )
     requested_capability = f"{resource}.{action}"
     resolved_trace_id = trace_id
 
     if requested_capability not in effective_capabilities:
         resolved_trace_id = resolved_trace_id or "trace-denied"
+        denial_reasons = []
+        denial_reasons.extend(
+            get_denial_reasons(
+                "user",
+                delegated_user,
+                resource,
+                action,
+                context=context,
+            )
+        )
+        denial_reasons.extend(
+            get_denial_reasons(
+                "agent",
+                caller_agent,
+                resource,
+                action,
+                audience=target_agent,
+                context=context,
+            )
+        )
+        denial_reasons.extend(
+            get_denial_reasons(
+                "agent",
+                target_agent,
+                resource,
+                action,
+                context=context,
+            )
+        )
         write_audit_log(
             trace_id=resolved_trace_id,
             token_jti=None,
@@ -64,7 +107,10 @@ def issue_delegated_token(
             action=action,
             decision="deny",
             reason_code="AUTHZ_001",
-            reason_detail="Capability intersection is empty for the requested action.",
+            reason_detail=(
+                "Capability intersection is empty for the requested action. "
+                + ("; ".join(denial_reasons) if denial_reasons else "No matching capability.")
+            ),
         )
         raise ValueError("AUTHZ_001")
 
@@ -77,6 +123,8 @@ def issue_delegated_token(
             "name": task_name,
             "resource": resource,
             "action": action,
+            "purpose": purpose,
+            "current_hour": current_hour,
         },
         trace_id=trace_id,
         parent_jti=parent_jti,

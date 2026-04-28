@@ -33,6 +33,8 @@ def attempt_internal_read(user_id: str) -> dict:
         resource="bitable",
         action="read",
         task_name="illicit_internal_read",
+        purpose="unauthorized_probe",
+        current_hour=10,
         trace_id=None,
         parent_jti=None,
     )

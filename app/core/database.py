@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -97,13 +98,60 @@ SEED_USERS = [
 ]
 
 SEED_CAPABILITIES = [
-    ("agent", "doc-agent", "bitable", "read", "allow", {"audiences": ["enterprise-data-agent"]}),
+    (
+        "agent",
+        "doc-agent",
+        "bitable",
+        "read",
+        "allow",
+        {
+            "audiences": ["enterprise-data-agent"],
+            "allowed_tasks": [
+                "generate_report",
+                "generate_report_with_fallback",
+                "manual_enterprise_read",
+                "availability_probe",
+            ],
+            "time_window": {"start_hour": 8, "end_hour": 20},
+        },
+    ),
     ("agent", "doc-agent", "document", "write", "allow", {"audiences": ["doc-agent"]}),
     ("agent", "doc-agent", "report", "generate", "allow", {"audiences": ["doc-agent"]}),
-    ("agent", "enterprise-data-agent", "bitable", "read", "allow", {"delegation_only": True}),
+    (
+        "agent",
+        "enterprise-data-agent",
+        "bitable",
+        "read",
+        "allow",
+        {
+            "delegation_only": True,
+            "allowed_tasks": [
+                "generate_report",
+                "generate_report_with_fallback",
+                "manual_enterprise_read",
+                "availability_probe",
+            ],
+            "time_window": {"start_hour": 8, "end_hour": 20},
+        },
+    ),
     ("agent", "enterprise-data-agent", "directory", "read", "allow", {"delegation_only": True}),
     ("agent", "web-search-agent", "web", "search", "allow", {"audiences": ["web-search-agent"]}),
-    ("user", "user-001", "bitable", "read", "allow", {}),
+    (
+        "user",
+        "user-001",
+        "bitable",
+        "read",
+        "allow",
+        {
+            "allowed_tasks": [
+                "generate_report",
+                "generate_report_with_fallback",
+                "manual_enterprise_read",
+                "availability_probe",
+            ],
+            "time_window": {"start_hour": 8, "end_hour": 20},
+        },
+    ),
     ("user", "user-001", "document", "write", "allow", {}),
     ("user", "user-001", "web", "search", "allow", {}),
 ]
@@ -115,14 +163,14 @@ def _utcnow() -> str:
 
 def ensure_database() -> None:
     Path(settings.database_path).parent.mkdir(parents=True, exist_ok=True)
-    with sqlite3.connect(settings.database_path) as connection:
+    with closing(sqlite3.connect(settings.database_path)) as connection:
         connection.executescript(SCHEMA_SQL)
         connection.commit()
     seed_database()
 
 
 def seed_database() -> None:
-    with sqlite3.connect(settings.database_path) as connection:
+    with closing(sqlite3.connect(settings.database_path)) as connection:
         connection.row_factory = sqlite3.Row
 
         for agent in SEED_AGENTS:

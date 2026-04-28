@@ -9,6 +9,7 @@ from app.api.audit import router as audit_router
 from app.api.auth import router as auth_router
 from app.api.demo import router as demo_router
 from app.api.policy import router as policy_router
+from app.api.ui import router as ui_router
 from app.core.config import settings
 from app.core.database import ensure_database
 
@@ -31,6 +32,7 @@ app.include_router(audit_router)
 app.include_router(demo_router)
 app.include_router(policy_router)
 app.include_router(agent_router)
+app.include_router(ui_router)
 
 
 @app.get("/healthz")

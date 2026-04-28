@@ -16,6 +16,9 @@ def check_policy(payload: PolicyCheckRequest):
             user_id=payload.delegated_user,
             caller_agent=payload.caller_agent,
             target_agent=payload.target_agent,
+            task_name=payload.task_name,
+            purpose=payload.purpose,
+            current_hour=payload.current_hour,
         )
     )
     requested_capability = f"{payload.resource}.{payload.action}"
@@ -23,4 +26,9 @@ def check_policy(payload: PolicyCheckRequest):
         "allowed": requested_capability in effective_capabilities,
         "requested_capability": requested_capability,
         "effective_capabilities": effective_capabilities,
+        "context": {
+            "task_name": payload.task_name,
+            "purpose": payload.purpose,
+            "current_hour": payload.current_hour,
+        },
     }

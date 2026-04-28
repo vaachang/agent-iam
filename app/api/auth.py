@@ -41,6 +41,8 @@ def delegate_token_endpoint(payload: DelegatedTokenRequest):
             resource=payload.resource,
             action=payload.action,
             task_name=payload.task_name,
+            purpose=payload.purpose,
+            current_hour=payload.current_hour,
             trace_id=payload.trace_id,
             parent_jti=payload.parent_jti,
         )
