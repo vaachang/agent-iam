@@ -1,12 +1,25 @@
-.venv/
-__pycache__/
-.pytest_cache/
-*.pyc
-*.pyo
-*.db
-*.sqlite3
+# === 敏感数据 ===
 .env
-.codex
-data/
-notice.txt
-requirement_document.md
+info_other.md
+
+# === 运行时产物 ===
+__pycache__/
+*.pyc
+.iam_server.pid
+audit.log
+# revocation.db
+*.db
+
+# === Claude Code 内部目录 ===
+.claude/
+
+# === 内部文档（不对外提交）===
+guide.md
+REVIEW_REPORT.md
+requirement_doc.md
+
+# === 冗余测试文件 ===
+test_master.py
+test_feishu_and_llm.py
+test_bugs.py
+test_final.py
